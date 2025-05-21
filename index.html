@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bucin </title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom right, #6a0dad, #8a2be2);
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .container {
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+    input {
+      padding: 10px;
+      margin: 10px 5px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      width: 100px;
+      height: 45px;
+      cursor: pointer;
+      color: white;
+    }
+    .btn-yes {
+      background-color: #007bff;
+    }
+    .btn-no {
+      background-color: #dc3545;
+      position: absolute;
+      transition: top 0.3s, left 0.3s;
+    }
+    .btn-enter {
+      background-color: #007bff;
+    }
+    #buttonContainer {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      position: relative;
+      height: 150px;
+    }
+    .love {
+      position: absolute;
+      color: pink;
+      animation: float 3s linear infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-500px); opacity: 0; }
+    }
+    #hasil {
+      font-size: 1.1em;
+      white-space: normal;
+      overflow: hidden;
+      display: inline-block;
+      max-height: 300px;
+      line-height: 1.6;
+      animation: typing 10s steps(40, end) 1;
+      border-left: 2px solid white;
+      padding-left: 10px;
+    }
+
+    @keyframes typing {
+      from { max-height: 0; }
+      to { max-height: 1000px; }
+    }
+
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="step1">
+    <h1>Tulis nama kamu:</h1>
+    <input type="text" id="nama">
+    <button class="btn-enter" onclick="lanjut()">Enter</button>
+  </div>
+
+  <div class="container" id="step2" style="display:none;">
+    <h1 id="pertanyaan"></h1>
+    <div id="buttonContainer">
+      <button class="btn-yes" onclick="jawabIya()">Iya</button>
+      <button class="btn-no" id="noBtn" onmouseover="hindar()" onclick="hindar()">Tidak</button>
+    </div>
+  </div>
+
+  <div class="container" id="step3" style="display:none;">
+    <h1 id="hasil"></h1>
+    <audio id="lagu" autoplay loop></audio>
+  </div>
+
+  <script>
+    let namaPengguna = "";
+
+    function lanjut() {
+      namaPengguna = document.getElementById("nama").value;
+      if (namaPengguna.trim() === "") return alert("Isi dulu dong namanya");
+      document.getElementById("step1").style.display = "none";
+      document.getElementById("step2").style.display = "block";
+      document.getElementById("pertanyaan").innerText =
+        `Hai ${namaPengguna} yaaa, pengirim ini mau nanyaa, kamu suka engga sama akuu?`;
+      posisikanNo();
+    }
+
+    function jawabIya() {
+      document.getElementById("step2").style.display = "none";
+      document.getElementById("step3").style.display = "block";
+      const hasil = document.getElementById("hasil");
+      const teks = "heiii, makasih yaa udah ngakuu kalau sukaa sama akuu hihihii, aku juga suka sama kamu kok, cuma aku ga berani bilang, jadinya aku buat lewat inii hehehehe, aku juga sayang kamu kok, i love you";
+      hasil.innerHTML = "";
+      ketikEfek(teks, hasil);
+      setInterval(loveParticles, 200);
+      putarLagu();
+    }
+
+    function ketikEfek(teks, elemen) {
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < teks.length) {
+          elemen.innerHTML += teks[i];
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 50);
+    }
+
+    function hindar() {
+      posisikanNo();
+    }
+
+    function posisikanNo() {
+      const btn = document.getElementById("noBtn");
+      const container = document.getElementById("buttonContainer");
+
+      const maxX = container.offsetWidth - btn.offsetWidth;
+      const maxY = container.offsetHeight - btn.offsetHeight;
+
+      const offsetX = Math.random() * maxX * 1.2 - maxX / 2;
+      const offsetY = Math.random() * maxY * 1.2 - maxY / 2;
+
+      btn.style.left = `${offsetX}px`;
+      btn.style.top = `${offsetY}px`;
+    }
+
+    function loveParticles() {
+      const love = document.createElement("div");
+      love.classList.add("love");
+      love.style.left = Math.random() * window.innerWidth + "px";
+      love.style.top = window.innerHeight + "px";
+      love.innerHTML = "♥";
+      document.body.appendChild(love);
+      setTimeout(() => love.remove(), 3000);
+    }
+
+    function putarLagu() {
+      fetch("https://api.siputzx.my.id/api/s/spotify?query=serana")
+        .then(res => res.json())
+        .then(data => {
+          const audio = document.getElementById("lagu");
+          if (data && data.result && data.result.preview_url) {
+            audio.src = data.result.preview_url;
+            audio.play().catch(err => console.log("Autoplay ditolak:", err));
+          } else {
+            console.log("Lagu tidak ditemukan.");
+          }
+        })
+        .catch(err => console.error("Gagal ambil data lagu:", err));
+    }
+  </script>
+</body>
+</html>
